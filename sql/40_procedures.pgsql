@@ -6,15 +6,15 @@ CREATE OR REPLACE PROCEDURE clear_table(table_name_arg TEXT)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF EXISTS (
+    IF NOT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_name = table_name_arg
     ) THEN
-        EXECUTE format('TRUNCATE %I CASCADE', table_name_arg);
-        RAISE NOTICE 'Table "%" has been cleared', table_name_arg;
-    ELSE
-        RAISE NOTICE 'Table "%" does not exist', table_name_arg;
+        RAISE EXCEPTION 'Table "%" does not exist', table_name_arg;
     END IF;
+
+    EXECUTE format('TRUNCATE %I CASCADE', table_name_arg);
+    RAISE NOTICE 'Table "%" has been cleared', table_name_arg;
 END;
 $$;
 
@@ -219,7 +219,7 @@ $$;
 
 -- UPDATE DATA
 
-CREATE OR REPLACE PROCEDURE update_table_by_pk(
+CREATE OR REPLACE PROCEDURE update_by_pk(
     table_name_arg TEXT,
     pk_column TEXT,
     pk_value ANYELEMENT,
@@ -327,10 +327,12 @@ $$;
 
 CREATE OR REPLACE PROCEDURE delete_by_pk(
     table_name_arg TEXT,
-    pk_column_name TEXT,
+    pk_column TEXT,
     pk_value ANYELEMENT
 )
 LANGUAGE plpgsql AS $$
+DECLARE
+    is_primary_key BOOLEAN;
 BEGIN
     IF NOT EXISTS (
         SELECT FROM information_schema.tables
@@ -344,17 +346,32 @@ BEGIN
         SELECT column_name 
         FROM information_schema.columns 
         WHERE table_name = table_name_arg 
-          AND column_name = pk_column_name
+          AND column_name = pk_column
     ) THEN 
-        RAISE EXCEPTION 'Column "%" does not exist', pk_column_name;
+        RAISE EXCEPTION 'Column "%" does not exist', pk_column;
+    END IF;
+
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+        ON tc.constraint_name = kcu.constraint_name
+        AND tc.table_name = kcu.table_name
+        WHERE tc.table_name = table_name_arg
+          AND tc.constraint_type = 'PRIMARY KEY'
+          AND kcu.column_name = pk_column
+    ) INTO is_primary_key;
+
+    IF NOT is_primary_key THEN
+        RAISE EXCEPTION 'Column "%" is not a primary key in table "%"', pk_column, table_name_arg;
     END IF;
 
     EXECUTE format(
         'DELETE FROM %I WHERE %I = $1',
-        table_name_arg, pk_column_name
+        table_name_arg, pk_column
     ) USING pk_value;
 
-    RAISE NOTICE 'Row with "%" = "%" has been deleted from table "%"', pk_column_name, pk_value, table_name_arg;
+    RAISE NOTICE 'Row with "%" = "%" has been deleted from table "%"', pk_column, pk_value, table_name_arg;
 END;
 $$;
 

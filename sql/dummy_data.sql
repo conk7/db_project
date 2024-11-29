@@ -38,3 +38,5 @@ CALL add_anime_name_locale(7::int, 'Shingeki no Kyojin'::varchar, 'Attack on Tit
 CALL add_character('Test_char_name'::varchar, 10::int, 'some_desc'::text);
 
 CALL delete_by_pk('anime'::text, 'id'::text, 11::int);
+
+call update_table_by_pk('anime'::text, 'id'::text, '13'::int, '{"name": "進撃の巨人", "score": "8.9"}'::JSONB);

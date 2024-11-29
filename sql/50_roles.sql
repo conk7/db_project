@@ -24,6 +24,12 @@ GRANT TRUNCATE ON anime TO basic_role;
 GRANT TRUNCATE ON anime_name_locale TO basic_role;
 GRANT TRUNCATE ON character TO basic_role;
 
+GRANT UPDATE ON genre TO basic_role;
+GRANT UPDATE ON studio TO basic_role;
+GRANT UPDATE ON anime TO basic_role;
+GRANT UPDATE ON anime_name_locale TO basic_role;
+GRANT UPDATE ON character TO basic_role;
+
 GRANT DELETE ON genre TO basic_role;
 GRANT DELETE ON studio TO basic_role;
 GRANT DELETE ON anime TO basic_role;
@@ -41,6 +47,8 @@ GRANT EXECUTE ON PROCEDURE add_studio TO basic_role;
 GRANT EXECUTE ON PROCEDURE add_anime TO basic_role;
 GRANT EXECUTE ON PROCEDURE add_anime_name_locale TO basic_role;
 GRANT EXECUTE ON PROCEDURE add_character TO basic_role;
+
+GRANT EXECUTE ON PROCEDURE update_by_pk TO basic_role;
 
 GRANT EXECUTE ON PROCEDURE delete_character_by_description TO basic_role;
 GRANT EXECUTE ON PROCEDURE delete_by_pk TO basic_role;
