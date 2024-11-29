@@ -118,10 +118,10 @@ CREATE OR REPLACE PROCEDURE add_anime(
     anime_name VARCHAR,
     anime_studio VARCHAR,
     anime_synopsis TEXT,
+    anime_image_url VARCHAR,
     anime_premiere_date DATE,
     anime_genre VARCHAR,
     anime_type anime_type,
-    anime_image_url VARCHAR DEFAULT NULL,
     anime_finale_date DATE DEFAULT NULL,
     anime_num_episodes INT DEFAULT 0,
     anime_score FLOAT DEFAULT NULL
@@ -142,10 +142,6 @@ BEGIN
     
     IF anime_premiere_date IS NULL THEN
         RAISE EXCEPTION 'Premiere date cannot be null';
-    END IF;
-
-    IF anime_score IS NULL THEN
-        RAISE EXCEPTION 'Score cannot be null';
     END IF;
     
     INSERT INTO anime (

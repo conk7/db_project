@@ -27,14 +27,14 @@ CREATE TABLE anime (
   name VARCHAR(100) NOT NULL CHECK(LENGTH(name) > 0),
   studio VARCHAR(100) REFERENCES studio(name) ON DELETE CASCADE,
   synopsis TEXT NOT NULL CHECK(LENGTH(synopsis) > 0),
-  image_url VARCHAR(1000) CHECK(LENGTH(image_url) > 0),
+  image_url VARCHAR(1000) NOT NULL CHECK(LENGTH(image_url) > 0),
   premiere_date DATE NOT NULL,
   finale_date DATE,
-  airing_period_days INT,
   num_episodes INT CHECK(num_episodes >= 0),
   score FLOAT,
   genre VARCHAR(100) REFERENCES genre(name) ON DELETE CASCADE,
-  type anime_type NOT NULL
+  type anime_type NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE anime_name_locale (
