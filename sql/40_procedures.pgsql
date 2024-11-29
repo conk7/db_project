@@ -80,7 +80,7 @@ $$;
 
 
 
--- ADD NEW DATA
+-- INSERT DATA
 
 CREATE OR REPLACE PROCEDURE add_genre(
     genre_name VARCHAR,
@@ -214,6 +214,89 @@ BEGIN
     VALUES (character_name, anime_id_arg, character_description);
 END;
 $$;
+
+
+
+-- UPDATE DATA
+
+CREATE OR REPLACE PROCEDURE update_table_by_pk(
+    table_name_arg TEXT,
+    pk_column TEXT,
+    pk_value ANYELEMENT,
+    updates JSONB
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    pk_exists BOOLEAN;
+    is_primary_key BOOLEAN;
+    update_query TEXT;
+    update_columns TEXT;
+    key TEXT;
+    value TEXT;
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = table_name_arg
+          AND table_type = 'BASE TABLE'
+    ) THEN 
+        RAISE EXCEPTION 'Table "%" does not exist', table_name_arg;
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = table_name_arg 
+          AND column_name = pk_column
+    ) THEN 
+        RAISE EXCEPTION 'Column "%" does not exist', pk_column;
+    END IF;
+
+    EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1)', 
+                   table_name_arg, pk_column)
+    INTO pk_exists
+    USING pk_value;
+
+    IF NOT pk_exists THEN
+        RAISE EXCEPTION 'No such pk value "%" was found', pk_value;
+    END IF;
+
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+        ON tc.constraint_name = kcu.constraint_name
+        AND tc.table_name = kcu.table_name
+        WHERE tc.table_name = table_name_arg
+          AND tc.constraint_type = 'PRIMARY KEY'
+          AND kcu.column_name = pk_column
+    ) INTO is_primary_key;
+
+    IF NOT is_primary_key THEN
+        RAISE EXCEPTION 'Column "%" is not a primary key in table "%"', pk_column, table_name_arg;
+    END IF;
+
+    update_columns := '';
+    FOR key, value IN
+        SELECT * FROM jsonb_each_text(updates)
+    LOOP
+        IF update_columns != '' THEN
+            update_columns := update_columns || ', ';
+        END IF;
+        update_columns := update_columns || format('%I = %L', key, value);
+    END LOOP;
+
+    update_query := format(
+        'UPDATE %I SET %s WHERE %I = $1',
+        table_name_arg,
+        update_columns,
+        pk_column
+    );
+
+    EXECUTE update_query USING pk_value;
+END;
+$$;
+
 
 
 -- DELETE DATA
