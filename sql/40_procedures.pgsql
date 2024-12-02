@@ -57,11 +57,11 @@ BEGIN
             'image_url', a.image_url,
             'premiere_date', a.premiere_date,
             'finale_date', a.finale_date,
-            'airing_period_days', a.airing_period_days,
             'num_episodes', a.num_episodes,
             'score', a.score,
             'genre', a.genre,
-            'type', a.type
+            'type', a.type,
+            'updated_at', a.updated_at
         )
     )
     INTO result
@@ -71,7 +71,7 @@ BEGIN
 
     IF result IS NULL THEN
         RAISE NOTICE 'No anime found with English name containing "%"', english_name_arg;
-        RETURN '[]'::JSONB; -- Возвращаем пустой JSON-массив
+        RETURN '[]'::JSONB;
     END IF;
 
     RETURN result;

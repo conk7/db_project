@@ -27,7 +27,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
+  NEW.updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow';
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
