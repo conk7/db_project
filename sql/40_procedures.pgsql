@@ -14,7 +14,6 @@ BEGIN
     END IF;
 
     EXECUTE format('TRUNCATE %I CASCADE', table_name_arg);
-    RAISE NOTICE 'Table "%" has been cleared', table_name_arg;
 END;
 $$;
 
@@ -27,8 +26,6 @@ BEGIN
     TRUNCATE anime CASCADE;
     TRUNCATE anime_name_locale CASCADE;
     TRUNCATE character CASCADE;
-
-    RAISE NOTICE 'All tables have been cleared';
 END;
 $$;
 
@@ -115,13 +112,13 @@ END;
 $$;
 
 CREATE OR REPLACE PROCEDURE add_anime(
-    anime_name VARCHAR,
+    anime_name TEXT,
     anime_studio VARCHAR,
     anime_synopsis TEXT,
-    anime_image_url VARCHAR,
     anime_premiere_date DATE,
     anime_genre VARCHAR,
     anime_type anime_type,
+    anime_image_url TEXT,
     anime_finale_date DATE DEFAULT NULL,
     anime_num_episodes INT DEFAULT 0,
     anime_score FLOAT DEFAULT NULL
@@ -172,8 +169,8 @@ $$;
 
 CREATE OR REPLACE PROCEDURE add_anime_name_locale(
     anime_id_arg INT,
-    romaji_name_arg VARCHAR(200) DEFAULT NULL,
-    english_name_arg VARCHAR(200) DEFAULT NULL
+    romaji_name_arg TEXT DEFAULT NULL,
+    english_name_arg TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -192,7 +189,7 @@ END;
 $$;
 
 CREATE OR REPLACE PROCEDURE add_character(
-    character_name VARCHAR,
+    character_name TEXT,
     anime_id_arg INT,
     character_description TEXT DEFAULT NULL
 )
@@ -288,7 +285,6 @@ BEGIN
         update_columns,
         pk_column
     );
-
     EXECUTE update_query USING pk_value;
 END;
 $$;
@@ -316,8 +312,6 @@ BEGIN
 
     -- DELETE FROM character
     -- WHERE description LIKE '%' || target_description || '%';
-
-    RAISE NOTICE 'Characters with description "%", have been deleted', target_description;
 END;
 $$;
 
@@ -366,8 +360,6 @@ BEGIN
         'DELETE FROM %I WHERE %I = $1',
         table_name_arg, pk_column
     ) USING pk_value;
-
-    RAISE NOTICE 'Row with "%" = "%" has been deleted from table "%"', pk_column, pk_value, table_name_arg;
 END;
 $$;
 

@@ -23,20 +23,20 @@ COMMIT;
 CALL add_genre('ActioN'::varchar, 'some_desc'::text);
 CALL add_studio('Wit Studio'::varchar, 'some_desc'::text);
 CALL add_anime(
-  '進撃の巨人'::varchar, 
+  '進撃の巨人'::TEXT, 
   'Wit Studio'::varchar, 
   'Humans fight titans'::text, 
   '2013-04-07'::date, 
   'Action'::varchar, 
   'TV'::anime_type,
-  'http://example.com/aot.jpg'::varchar, 
-  '2013-04-08', 
+  'http://example.com/aot.jpg'::TEXT, 
+  '2013-04-08'::date,
   25::int, 
   8.9::float
 );
-CALL add_anime_name_locale(7::int, 'Shingeki no Kyojin'::varchar, 'Attack on Titan'::varchar);
-CALL add_character('Test_char_name'::varchar, 10::int, 'some_desc'::text);
+CALL add_anime_name_locale(7::int, 'Shingeki no Kyojin'::TEXT, 'Attack on Titan'::TEXT);
+CALL add_character('Test_char_name'::TEXT, 10::int, 'some_desc'::text);
 
 CALL delete_by_pk('anime'::text, 'id'::text, 11::int);
 
-call update_table_by_pk('anime'::text, 'id'::text, '13'::int, '{"name": "進撃の巨人", "score": "8.9"}'::JSONB);
+call update_by_pk('anime'::text, 'id'::text, '13'::int, '{"name": "進撃の巨人", "score": "8.9"}'::JSONB);
