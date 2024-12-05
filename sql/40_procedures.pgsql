@@ -46,9 +46,7 @@ BEGIN
     SELECT jsonb_agg(
         jsonb_build_object(
             'id', a.id,
-            'romaji_name', COALESCE(anl.romaji_name, 'N/A'),
-            'english_name', COALESCE(anl.english_name, 'N/A'),
-            'original_name', a.name,
+            'name', a.name,
             'studio', a.studio,
             'synopsis', a.synopsis,
             'image_url', a.image_url,
@@ -63,8 +61,7 @@ BEGIN
     )
     INTO result
     FROM anime a
-    JOIN anime_name_locale anl ON a.id = anl.anime_id
-    WHERE anl.english_name ILIKE '%' || english_name_arg || '%';
+    WHERE a.name ILIKE '%' || english_name_arg || '%';
 
     IF result IS NULL THEN
         RAISE NOTICE 'No anime found with English name containing "%"', english_name_arg;
@@ -169,8 +166,8 @@ $$;
 
 CREATE OR REPLACE PROCEDURE add_anime_name_locale(
     anime_id_arg INT,
-    romaji_name_arg TEXT DEFAULT NULL,
-    english_name_arg TEXT DEFAULT NULL
+    japanese_name_arg TEXT DEFAULT NULL,
+    romaji_name_arg TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -182,8 +179,8 @@ BEGIN
         RAISE EXCEPTION 'Anime ID % does not exist in the anime table', anime_id_arg;
     END IF;
     
-    INSERT INTO anime_name_locale (anime_id, romaji_name, english_name)
-    VALUES (anime_id_arg, romaji_name_arg, english_name_arg)
+    INSERT INTO anime_name_locale (anime_id, japanese_name, romaji_name)
+    VALUES (anime_id_arg, japanese_name_arg, romaji_name_arg)
     ON CONFLICT (anime_id) DO NOTHING;
 END;
 $$;

@@ -39,8 +39,8 @@ CREATE TABLE anime (
 
 CREATE TABLE anime_name_locale (
   anime_id INT REFERENCES anime(id) ON DELETE CASCADE PRIMARY KEY,
-  romaji_name TEXT,
-  english_name TEXT
+  japanese_name TEXT,
+  romaji_name TEXT
 );
 
 CREATE TABLE character (
@@ -54,10 +54,7 @@ CREATE TABLE character (
 
 -- INDICES
 
--- CREATE INDEX idx_anime_name ON anime(name);
--- CREATE INDEX idx_locale_romaji_name ON anime_name_locale(romaji_name);
-CREATE INDEX idx_locale_english_name ON anime_name_locale(english_name);
--- CREATE INDEX idx_character_name ON character(name);
+CREATE INDEX idx_anime_name ON anime(name);
 CREATE INDEX idx_character_description ON character(description);
 
 COMMIT;
