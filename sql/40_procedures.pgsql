@@ -61,7 +61,7 @@ BEGIN
     )
     INTO result
     FROM anime a
-    WHERE a.name ILIKE '%' || english_name_arg || '%';
+    WHERE LOWER(a.name) ILIKE '%' || LOWER(english_name_arg) || '%';
 
     IF result IS NULL THEN
         RAISE NOTICE 'No anime found with English name containing "%"', english_name_arg;
