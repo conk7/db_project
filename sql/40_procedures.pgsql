@@ -212,7 +212,7 @@ $$;
 CREATE OR REPLACE PROCEDURE update_by_pk(
     table_name_arg TEXT,
     pk_column TEXT,
-    pk_value ANYELEMENT,
+    pk_value TEXT,  
     updates JSONB
 )
 LANGUAGE plpgsql
@@ -224,6 +224,7 @@ DECLARE
     update_columns TEXT;
     key TEXT;
     value TEXT;
+    pk_type TEXT;
 BEGIN
     IF NOT EXISTS (
         SELECT FROM information_schema.tables
@@ -242,10 +243,27 @@ BEGIN
         RAISE EXCEPTION 'Column "%" does not exist', pk_column;
     END IF;
 
-    EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1)', 
-                   table_name_arg, pk_column)
-    INTO pk_exists
-    USING pk_value;
+    SELECT data_type INTO pk_type
+    FROM information_schema.columns
+    WHERE table_name = table_name_arg
+      AND column_name = pk_column;
+
+    CASE pk_type
+        WHEN 'integer' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::int)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::int;
+        WHEN 'bigint' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::bigint)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::bigint;
+        WHEN 'varchar' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::varchar)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::varchar;
+        ELSE
+            RAISE EXCEPTION 'Unsupported primary key type: %', pk_type;
+    END CASE;
 
     IF NOT pk_exists THEN
         RAISE EXCEPTION 'No such pk value "%" was found', pk_value;
@@ -276,13 +294,13 @@ BEGIN
         update_columns := update_columns || format('%I = %L', key, value);
     END LOOP;
 
-    update_query := format(
-        'UPDATE %I SET %s WHERE %I = $1',
+    EXECUTE format(
+        'UPDATE %I SET %s WHERE %I = $1::%s',
         table_name_arg,
         update_columns,
-        pk_column
-    );
-    EXECUTE update_query USING pk_value;
+        pk_column,
+        pk_type
+    ) USING pk_value;
 END;
 $$;
 
@@ -315,11 +333,14 @@ $$;
 CREATE OR REPLACE PROCEDURE delete_by_pk(
     table_name_arg TEXT,
     pk_column TEXT,
-    pk_value ANYELEMENT
+    pk_value TEXT
 )
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+AS $$
 DECLARE
+    pk_exists BOOLEAN;
     is_primary_key BOOLEAN;
+    pk_type TEXT;
 BEGIN
     IF NOT EXISTS (
         SELECT FROM information_schema.tables
@@ -338,6 +359,32 @@ BEGIN
         RAISE EXCEPTION 'Column "%" does not exist', pk_column;
     END IF;
 
+    SELECT data_type INTO pk_type
+    FROM information_schema.columns
+    WHERE table_name = table_name_arg
+      AND column_name = pk_column;
+
+    CASE pk_type
+        WHEN 'integer' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::int)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::int;
+        WHEN 'bigint' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::bigint)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::bigint;
+        WHEN 'varchar' THEN
+            EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I WHERE %I = $1::varchar)', table_name_arg, pk_column)
+                INTO pk_exists
+                USING pk_value::varchar;
+        ELSE
+            RAISE EXCEPTION 'Unsupported primary key type: %', pk_type;
+    END CASE;
+
+    IF NOT pk_exists THEN
+        RAISE EXCEPTION 'No such pk value "%" was found', pk_value;
+    END IF;
+
     SELECT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints tc
@@ -354,8 +401,10 @@ BEGIN
     END IF;
 
     EXECUTE format(
-        'DELETE FROM %I WHERE %I = $1',
-        table_name_arg, pk_column
+        'DELETE FROM %I WHERE %I = $1::%s',
+        table_name_arg,
+        pk_column,
+        pk_type
     ) USING pk_value;
 END;
 $$;
