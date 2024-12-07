@@ -8,6 +8,13 @@ CREATE TYPE anime_type AS ENUM (
 'Other'
 );
 
+CREATE TYPE anime_status AS ENUM (
+'Announced',
+'Airing',
+'Finished',
+'Discontinued'
+);
+
 
 
 -- SCHEMAS
@@ -34,6 +41,7 @@ CREATE TABLE anime (
   score NUMERIC(4, 2) CHECK(0 <= score and score <= 10),
   genre VARCHAR(100) REFERENCES genre(name) ON DELETE CASCADE,
   type anime_type NOT NULL,
+  status anime_status NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
 

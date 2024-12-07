@@ -56,6 +56,7 @@ BEGIN
             'score', a.score,
             'genre', a.genre,
             'type', a.type,
+            'status', a.status
             'updated_at', a.updated_at
         )
     )
@@ -115,6 +116,7 @@ CREATE OR REPLACE PROCEDURE add_anime(
     anime_premiere_date DATE,
     anime_genre VARCHAR,
     anime_type anime_type,
+    anime_status anime_status,
     anime_image_url TEXT,
     anime_finale_date DATE DEFAULT NULL,
     anime_num_episodes INT DEFAULT 0,
@@ -148,7 +150,8 @@ BEGIN
         num_episodes,
         score,
         genre,
-        type
+        type,
+		status
     ) VALUES (
         anime_name,
         anime_studio,
@@ -159,7 +162,8 @@ BEGIN
         anime_num_episodes,
         anime_score,
         anime_genre,
-        anime_type
+        anime_type,
+        anime_status
     );
 END;
 $$;
@@ -411,7 +415,156 @@ $$;
 
 
 
--- GET ALL TABLES DATA
+-- GET DATA
+
+CREATE OR REPLACE FUNCTION get_genre_data(
+    p_limit INT,
+    p_offset INT DEFAULT 0,
+    p_sort_column TEXT DEFAULT 'name',
+    p_sort_direction TEXT DEFAULT 'ASC',
+    p_search_term TEXT DEFAULT NULL
+) 
+RETURNS TABLE (
+    name VARCHAR,
+    description TEXT
+) AS $$
+BEGIN
+    -- Validate sort direction
+    IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
+        RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
+    END IF;
+    
+    -- Construct the base query
+    RETURN QUERY EXECUTE format(
+        'SELECT *
+         FROM genre
+         WHERE ($3 IS NULL OR name ILIKE $3 OR description ILIKE $3)
+         ORDER BY %I %s
+         LIMIT $1 OFFSET $2',
+         p_sort_column, p_sort_direction
+    ) USING p_limit, p_offset, CASE WHEN p_search_term IS NOT NULL THEN '%' || p_search_term || '%' ELSE NULL END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_studio_data(
+    p_limit INT,
+    p_offset INT DEFAULT 0,
+    p_sort_column TEXT DEFAULT 'name',
+    p_sort_direction TEXT DEFAULT 'ASC',
+    p_search_term TEXT DEFAULT NULL
+) 
+RETURNS TABLE (
+    name VARCHAR,
+    description TEXT
+) AS $$
+BEGIN
+    IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
+        RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
+    END IF;
+
+    RETURN QUERY EXECUTE format(
+        'SELECT *
+         FROM studio
+         WHERE ($3 IS NULL OR name ILIKE $3 OR description ILIKE $3)
+         ORDER BY %I %s
+         LIMIT $1 OFFSET $2',
+         p_sort_column, p_sort_direction
+    ) USING p_limit, p_offset, CASE WHEN p_search_term IS NOT NULL THEN '%' || p_search_term || '%' ELSE NULL END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_anime_data(
+    p_limit INT,
+    p_offset INT DEFAULT 0,
+    p_sort_column TEXT DEFAULT 'id',
+    p_sort_direction TEXT DEFAULT 'ASC'
+) 
+RETURNS TABLE (
+    id INT,
+    name TEXT,
+    studio VARCHAR,
+    synopsis TEXT,
+    image_url TEXT,
+    premiere_date DATE,
+    finale_date DATE,
+    num_episodes INT,
+    score NUMERIC(4, 2),
+    genre VARCHAR,
+    type anime_type,
+    status anime_status,
+    updated_at TIMESTAMP
+) AS $$
+BEGIN
+    IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
+        RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
+    END IF;
+    
+    RETURN QUERY EXECUTE format(
+        'SELECT *
+         FROM anime
+         ORDER BY %I %s
+         LIMIT $1 OFFSET $2',
+         p_sort_column, p_sort_direction
+    ) USING p_limit, p_offset;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_anime_name_locale_data(
+    p_limit INT,
+    p_offset INT DEFAULT 0,
+    p_sort_column TEXT DEFAULT 'anime_id',
+    p_sort_direction TEXT DEFAULT 'ASC',
+    p_search_term TEXT DEFAULT NULL
+) 
+RETURNS TABLE (
+    anime_id INT,
+    japanese_name TEXT,
+    romaji_name TEXT
+) AS $$
+BEGIN
+    IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
+        RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
+    END IF;
+
+    RETURN QUERY EXECUTE format(
+        'SELECT *
+         FROM anime_name_locale
+         WHERE ($3 IS NULL OR japanese_name ILIKE $3 OR romaji_name ILIKE $3)
+         ORDER BY %I %s
+         LIMIT $1 OFFSET $2',
+         p_sort_column, p_sort_direction
+    ) USING p_limit, p_offset, CASE WHEN p_search_term IS NOT NULL THEN '%' || p_search_term || '%' ELSE NULL END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_character_data(
+    p_limit INT,
+    p_offset INT DEFAULT 0,
+    p_sort_column TEXT DEFAULT 'id',
+    p_sort_direction TEXT DEFAULT 'ASC',
+    p_search_term TEXT DEFAULT NULL
+) 
+RETURNS TABLE (
+    id INT,
+    name TEXT,
+    anime_id INT,
+    description TEXT
+) AS $$
+BEGIN
+    IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
+        RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
+    END IF;
+
+    RETURN QUERY EXECUTE format(
+        'SELECT *
+         FROM character
+         WHERE ($3 IS NULL OR name ILIKE $3 OR description ILIKE $3)
+         ORDER BY %I %s
+         LIMIT $1 OFFSET $2',
+         p_sort_column, p_sort_direction
+    ) USING p_limit, p_offset, CASE WHEN p_search_term IS NOT NULL THEN '%' || p_search_term || '%' ELSE NULL END;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION get_all_tables_data()
 RETURNS TABLE(table_name TEXT, row_data JSONB) AS $$

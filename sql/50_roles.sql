@@ -53,6 +53,11 @@ GRANT EXECUTE ON PROCEDURE update_by_pk TO basic_role;
 GRANT EXECUTE ON PROCEDURE delete_character_by_description TO basic_role;
 GRANT EXECUTE ON PROCEDURE delete_by_pk TO basic_role;
 
+GRANT EXECUTE ON FUNCTION get_genre_data TO basic_role;
+GRANT EXECUTE ON FUNCTION get_studio_data TO basic_role;
+GRANT EXECUTE ON FUNCTION get_anime_data TO basic_role;
+GRANT EXECUTE ON FUNCTION get_anime_name_locale_data TO basic_role;
+GRANT EXECUTE ON FUNCTION get_character_data TO basic_role;
 GRANT EXECUTE ON FUNCTION get_all_tables_data TO basic_role;
 
 

@@ -9,6 +9,7 @@ CALL add_anime(
   '2013-04-07'::date, 
   'Action'::varchar, 
   'TV'::anime_type,
+  'Finished'::anime_status,
   'http://example.com/aot.jpg'::TEXT, 
   '2013-08-07'::date,
   25::int, 
@@ -24,6 +25,11 @@ CALL add_character('Test_char_name'::TEXT, 1::int, 'some_desc'::text);
 CALL update_by_pk('anime'::text, 'id'::text, 1::int, '{"name": "Attack on Titan", "score": "8.9"}'::JSONB);
 SELECT * FROM search_anime_by_english_name('titan'::text);
 SELECT * FROM get_all_tables_data();
+SELECT * FROM get_genre_data(1::int, 0::int, 'name'::text, 'asc'::text, 'act'::text);
+SELECT * FROM get_studio_data(1::int, 0::int, 'name'::text, 'asc'::text, 'wit'::text);
+SELECT * FROM get_anime_data(1::int, 0::int, 'name'::text, 'asc'::text);
+SELECT * FROM get_anime_name_locale_data(1::int, 0::int, 'romaji_name'::text, 'asc'::text, 'shingeki'::text);
+SELECT * FROM get_character_data(1::int, 0::int, 'name'::text, 'asc'::text, 'Test_Char_Name'::text);
 
 
 
