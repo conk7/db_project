@@ -56,7 +56,7 @@ BEGIN
             'score', a.score,
             'genre', a.genre,
             'type', a.type,
-            'status', a.status
+            'status', a.status,
             'updated_at', a.updated_at
         )
     )
