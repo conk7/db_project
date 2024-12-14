@@ -5,6 +5,8 @@ CREATE TYPE anime_type AS ENUM (
 'Movie',
 'OVA',
 'ONA',
+'Special',
+'Music',
 'Other'
 );
 
