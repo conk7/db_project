@@ -34,41 +34,17 @@ $$;
 -- SEARCH
 
 CREATE OR REPLACE FUNCTION search_anime_by_english_name(english_name_arg TEXT)
-RETURNS JSONB
+RETURNS SETOF anime
 LANGUAGE plpgsql AS $$
-DECLARE
-    result JSONB;
 BEGIN
-    IF english_name_arg IS NULL OR LENGTH(english_name_arg) = 0 THEN
-        RAISE EXCEPTION 'Search term cannot be null or empty';
+    IF english_name_arg IS NULL THEN
+        RAISE EXCEPTION 'Search term cannot be null';
     END IF;
 
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', a.id,
-            'name', a.name,
-            'studio', a.studio,
-            'synopsis', a.synopsis,
-            'image_url', a.image_url,
-            'premiere_date', a.premiere_date,
-            'finale_date', a.finale_date,
-            'num_episodes', a.num_episodes,
-            'score', a.score,
-            'genre', a.genre,
-            'type', a.type,
-            'status', a.status,
-            'updated_at', a.updated_at
-        )
-    )
-    INTO result
-    FROM anime a
-    WHERE LOWER(a.name) ILIKE '%' || LOWER(english_name_arg) || '%';
-
-    IF result IS NULL THEN
-        RETURN '[]'::JSONB;
-    END IF;
-
-    RETURN result;
+    RETURN QUERY
+    SELECT *
+    FROM anime
+    WHERE LOWER(name) ILIKE '%' || LOWER(english_name_arg) || '%';
 END;
 $$;
 
