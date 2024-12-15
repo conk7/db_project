@@ -1,0 +1,35 @@
+BEGIN;
+
+DROP TYPE IF EXISTS anime_type CASCADE;
+
+DROP TABLE IF EXISTS genre CASCADE;
+DROP TABLE IF EXISTS studio CASCADE;
+DROP TABLE IF EXISTS anime CASCADE;
+DROP TABLE IF EXISTS anime_name_locale CASCADE;
+DROP TABLE IF EXISTS character CASCADE;
+
+DROP PROCEDURE IF EXISTS clear_table;
+DROP PROCEDURE IF EXISTS clear_all_tables;
+DROP FUNCTION  IF EXISTS search_anime_by_english_name;
+DROP PROCEDURE IF EXISTS add_genre;
+DROP PROCEDURE IF EXISTS add_studio;
+DROP PROCEDURE IF EXISTS add_anime;
+DROP PROCEDURE IF EXISTS add_anime_name_locale;
+DROP PROCEDURE IF EXISTS add_character;
+DROP PROCEDURE IF EXISTS update_by_pk;
+DROP PROCEDURE IF EXISTS delete_character_by_description;
+DROP PROCEDURE IF EXISTS delete_by_pk;
+DROP FUNCTION  IF EXISTS get_genre_data;
+DROP FUNCTION  IF EXISTS get_studio_data;
+DROP FUNCTION  IF EXISTS get_anime_data;
+DROP FUNCTION  IF EXISTS get_anime_name_locale_data;
+DROP FUNCTION  IF EXISTS get_character_data;
+DROP FUNCTION  IF EXISTS get_all_tables_data;
+
+DROP OWNED BY user1;
+DROP USER IF EXISTS user1;
+
+DROP OWNED BY basic_role;
+DROP ROLE IF EXISTS basic_role;
+
+COMMIT;

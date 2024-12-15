@@ -1,0 +1,17 @@
+BEGIN;
+
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = DATE_TRUNC('day', CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE TRIGGER set_updated_at_trigger
+BEFORE INSERT OR UPDATE ON anime
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+COMMIT;

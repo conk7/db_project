@@ -1,0 +1,6 @@
+BEGIN;
+
+CREATE USER user1 WITH PASSWORD 'user1';
+GRANT basic_role TO user1;
+
+COMMIT;
