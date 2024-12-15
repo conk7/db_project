@@ -65,7 +65,6 @@ BEGIN
     WHERE LOWER(a.name) ILIKE '%' || LOWER(english_name_arg) || '%';
 
     IF result IS NULL THEN
-        RAISE NOTICE 'No anime found with English name containing "%"', english_name_arg;
         RETURN '[]'::JSONB;
     END IF;
 
@@ -322,15 +321,11 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (SELECT 1 FROM character WHERE description = target_description) THEN
-        RAISE NOTICE 'No character found with the provided description: %', target_description;
         RETURN;
     END IF;
 
     DELETE FROM character
     WHERE description = target_description;
-
-    -- DELETE FROM character
-    -- WHERE description LIKE '%' || target_description || '%';
 END;
 $$;
 
@@ -429,12 +424,10 @@ RETURNS TABLE (
     description TEXT
 ) AS $$
 BEGIN
-    -- Validate sort direction
     IF LOWER(p_sort_direction) NOT IN ('asc', 'desc') THEN
         RAISE EXCEPTION 'Invalid sort direction. Use ASC or DESC';
     END IF;
     
-    -- Construct the base query
     RETURN QUERY EXECUTE format(
         'SELECT *
          FROM genre

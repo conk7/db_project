@@ -5,7 +5,7 @@ CALL add_studio('Wit Studio'::varchar, 'Japanese animation studio founded on Jun
 CALL add_anime(
   'Attack on Titan'::TEXT, 
   'Wit Studio'::varchar, 
-  'Humans fight titans'::text, 
+  'On his first day of junior high, Eren Yeager comes face-to-face with a titan—and has his lunch stolen! From that day on, he holds a grudge against titans for taking his favorite food from him, a cheeseburger, vowing to eliminate their kind once and for all. Along with his adoptive sister Mikasa Ackerman and their friend Armin Arlert, the trio traverse the halls of Titan Junior High, encountering familiar faces and participating in various extracurricular activities as part of the Wall Cleanup Club. A parody of the immensely popular parent series, Shingeki! Kyojin Chuugakkou places beloved characters as junior high school students, fighting to protect their lunches from gluttonous titans.'::text, 
   '2013-04-07'::date, 
   'Action'::varchar, 
   'TV'::anime_type,
@@ -39,3 +39,9 @@ CALL clear_table('character'::text);
 CALL clear_all_tables();
 CALL delete_by_pk('anime'::text, 'id'::text, 1::int);
 CALL delete_character_by_description('some_desc'::text);
+
+
+--https://ru-images-s.kinorium.com/movie/1080/678289.jpg?1682675888
+--https://fast-anime.ru/storage/uploads/products/28111/2021/08/04/rRgIFWdD9jDrSRkup8t9TJF7go68wpq2ZfsAzFWT.jpeg
+--https://fast-anime.ru/storage/uploads/products/28110/2021/08/04/XMN1ccQH9m0q4eg4W25lyvUEjMCF2g5Xo7K1iECS.jpeg
+--https://cdn.ananasposter.ru/image/cache/catalog/poster/mult/90/3835-1000x830.jpg
