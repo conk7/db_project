@@ -34,7 +34,21 @@ $$;
 -- SEARCH
 
 CREATE OR REPLACE FUNCTION search_anime_by_english_name(english_name_arg TEXT)
-RETURNS SETOF anime
+RETURNS TABLE (
+    id INT,
+    anime_name TEXT,
+    anime_studio VARCHAR,
+    anime_synopsis TEXT,
+    anime_image_url TEXT,
+    anime_premiere_date DATE,
+    anime_finale_date DATE,
+    anime_num_episodes INT,
+    anime_score NUMERIC(4, 2),
+    anime_genre VARCHAR,
+    anime_type anime_type,
+    anime_status anime_status,
+    anime_updated_at TIMESTAMP
+)
 LANGUAGE plpgsql AS $$
 BEGIN
     IF english_name_arg IS NULL THEN
